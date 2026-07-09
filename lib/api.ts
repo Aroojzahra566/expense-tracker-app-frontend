@@ -1,4 +1,6 @@
+import { getAuthToken } from "@/lib/auth";
 import type {
+  AuthResponse,
   CategorySummaryItem,
   DashboardSummary,
   Expense,
@@ -25,6 +27,18 @@ export function getApiErrorMessage(error: unknown): string {
     return error instanceof Error
       ? error.message
       : "Something went wrong. Please try again.";
+  }
+
+  if (error.status === 401) {
+    return typeof error.detail === "string"
+      ? error.detail
+      : "Invalid email or password.";
+  }
+
+  if (error.status === 400) {
+    return typeof error.detail === "string"
+      ? error.detail
+      : "Request could not be completed.";
   }
 
   if (error.status === 404) {
@@ -63,6 +77,11 @@ async function fetchApi<T>(
   const timeout = setTimeout(() => controller.abort(), 15_000);
 
   try {
+    const token = getAuthToken();
+    const authHeaders: Record<string, string> = token
+      ? { Authorization: `Bearer ${token}` }
+      : {};
+
     const res = await fetch(url, {
       cache: "no-store",
       ...options,
@@ -70,6 +89,7 @@ async function fetchApi<T>(
       headers: {
         Accept: "application/json",
         "Content-Type": "application/json",
+        ...authHeaders,
         ...options?.headers,
       },
     });
@@ -165,6 +185,23 @@ export function getCategorySummary(): Promise<CategorySummaryItem[]> {
 
 export function getCategories(): Promise<string[]> {
   return fetchApi<string[]>("/categories");
+}
+
+export function signUp(
+  email: string,
+  password: string
+): Promise<AuthResponse> {
+  return fetchApi<AuthResponse>("/auth/signup", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
+}
+
+export function login(email: string, password: string): Promise<AuthResponse> {
+  return fetchApi<AuthResponse>("/auth/login", {
+    method: "POST",
+    body: JSON.stringify({ email, password }),
+  });
 }
 
 export async function getDashboardData() {

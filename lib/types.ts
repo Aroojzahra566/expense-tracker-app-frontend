@@ -52,3 +52,15 @@ export interface CategoryTimeSeries {
   dates: string[];
   byCategory: { category: string; values: number[] }[];
 }
+
+export interface AuthResponse {
+  access_token: string;
+  token_type: string;
+  user_id: number;
+  email: string;
+}
+
+export interface AuthUser {
+  user_id: number;
+  email: string;
+}

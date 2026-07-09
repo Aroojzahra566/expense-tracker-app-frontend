@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import { Calendar, Plus } from "lucide-react";
+import { useAuth } from "@/components/AuthProvider";
 
 interface DashboardHeaderProps {
   showAddButton?: boolean;
@@ -8,14 +11,33 @@ interface DashboardHeaderProps {
 export default function DashboardHeader({
   showAddButton = true,
 }: DashboardHeaderProps) {
+  const { user, isAuthenticated, openAuthModal } = useAuth();
+
+  const displayName = isAuthenticated && user
+    ? user.email.split("@")[0]
+    : "there";
+
   return (
     <header className="animate-fade-in flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
       <div>
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white sm:text-3xl">
-          Welcome Arooj ! <span aria-hidden="true">👋</span>
+          Welcome {displayName}! <span aria-hidden="true">👋</span>
         </h1>
         <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-          Here&apos;s what&apos;s happening with your finances today.
+          {isAuthenticated
+            ? "Here's what's happening with your finances today."
+            : (
+              <>
+                Sign in to sync your account.{" "}
+                <button
+                  type="button"
+                  onClick={() => openAuthModal("login")}
+                  className="font-medium text-indigo-500 hover:text-indigo-600 dark:text-indigo-400 dark:hover:text-indigo-300"
+                >
+                  Get started
+                </button>
+              </>
+            )}
         </p>
       </div>
 

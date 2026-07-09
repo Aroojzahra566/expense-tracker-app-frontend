@@ -12,10 +12,14 @@ import {
   Settings,
   Moon,
   Sun,
+  LogIn,
+  LogOut,
+  User,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
 import { getDashboardSummary } from "@/lib/api";
 import { useTheme } from "@/components/ThemeProvider";
+import { useAuth } from "@/components/AuthProvider";
 
 const navItems = [
   { label: "Dashboard", href: "/", icon: LayoutDashboard },
@@ -29,6 +33,7 @@ const navItems = [
 export default function Sidebar() {
   const pathname = usePathname();
   const { isDark, toggleTheme } = useTheme();
+  const { user, isAuthenticated, isLoading, openAuthModal, logout } = useAuth();
   const [totalBalance, setTotalBalance] = useState<number | null>(null);
 
   useEffect(() => {
@@ -76,6 +81,43 @@ export default function Sidebar() {
       </nav>
 
       <div className="space-y-4 px-4 pb-6">
+        {!isLoading && (
+          <div className="rounded-2xl bg-[#1e1e3f] p-4">
+            {isAuthenticated && user ? (
+              <>
+                <div className="flex items-center gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-indigo-500/20 text-indigo-300">
+                    <User className="h-4 w-4" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-white">
+                      {user.email}
+                    </p>
+                    <p className="text-xs text-slate-400">Signed in</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={logout}
+                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-white/10 px-4 py-2 text-sm font-medium text-slate-300 transition-colors hover:bg-white/5 hover:text-white"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Sign Out
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={() => openAuthModal("login")}
+                className="flex w-full items-center justify-center gap-2 rounded-xl bg-indigo-500 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-500/25 transition-all hover:bg-indigo-600"
+              >
+                <LogIn className="h-4 w-4" />
+                Sign In
+              </button>
+            )}
+          </div>
+        )}
+
         <div className="rounded-2xl bg-[#1e1e3f] p-4 transition-transform duration-300 hover:scale-[1.02]">
           <p className="text-xs font-medium text-slate-400">Total Balance</p>
           <p className="mt-1 text-2xl font-bold">
